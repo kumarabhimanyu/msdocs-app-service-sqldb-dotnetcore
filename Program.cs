@@ -12,16 +12,31 @@ if(builder.Environment.IsDevelopment())
 else
 {
     builder.Services.AddDbContext<MyDatabaseContext>(options =>
-        options.UseSqlServer(builder.Configuration["AZURE_SQL_CONNECTIONSTRING"]));
+        options.UseSqlServer(builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING")));
     builder.Services.AddStackExchangeRedisCache(options =>
     {
-        options.Configuration = builder.Configuration["AZURE_REDIS_CONNECTIONSTRING"];
-        options.InstanceName = "SampleInstance";
+    options.Configuration = builder.Configuration["AZURE_REDIS_CONNECTIONSTRING"];
+    options.InstanceName = "SampleInstance";
     });
 }
 
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddMcpServer()
+    .WithHttpTransport() // With streamable HTTP
+    .WithToolsFromAssembly(); // Add all classes marked with [McpServerToolType]
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 // Add App Service logging
 builder.Logging.AddAzureWebAppDiagnostics();
@@ -46,5 +61,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Todos}/{action=Index}/{id?}");
+app.MapMcp("/api/mcp");
+app.UseCors();
 
 app.Run();

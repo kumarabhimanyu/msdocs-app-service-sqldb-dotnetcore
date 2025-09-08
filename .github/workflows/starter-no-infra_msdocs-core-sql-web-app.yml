@@ -30,7 +30,7 @@ jobs:
         run: dotnet tool install --global dotnet-ef
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp1
 
       - name: Create EF Core migrations bundle
         run: dotnet ef migrations bundle --output ${{env.DOTNET_ROOT}}/myapp/migrations.bundle
